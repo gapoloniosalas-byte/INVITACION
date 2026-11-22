@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Geerar y Camila · Invitación de matrimonio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --olive:#3f4a2e;
+    --pink:#e58aa5;
+    --cream:#f6f3ec;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:#1d211a;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",Georgia,serif}
+
+  /* Escenario vertical 9:16 */
+  .stage{
+    position:relative;
+    height:100vh;height:100dvh;
+    width:min(100vw, calc(100vh * 9 / 16));
+    width:min(100vw, calc(100dvh * 9 / 16));
+    background:var(--cream);
+    overflow:hidden;
+    box-shadow:0 0 60px rgba(0,0,0,.45);
+  }
+  video,.cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  video{background:var(--cream)}
+
+  /* Portada: toque para abrir */
+  .cover{border:0;padding:0;margin:0;cursor:pointer;background:var(--cream) center/cover no-repeat;z-index:30;transition:opacity .5s}
+  .cover.hide{opacity:0;pointer-events:none}
+  .cover .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(246,243,236,.92) 0%,rgba(246,243,236,.0) 42%)}
+  .cover .cta{
+    position:absolute;left:50%;bottom:9%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:10px;
+    padding:13px 22px;border-radius:999px;
+    background:var(--olive);color:#fff;font-size:19px;font-weight:600;letter-spacing:.3px;white-space:nowrap;
+    box-shadow:0 8px 24px rgba(63,74,46,.35);
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  .cover .cta svg{width:20px;height:20px;fill:#fff}
+  @keyframes pulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.05)}}
+
+  /* Zonas pinchables sobre el video */
+  .hot{
+    position:absolute;z-index:10;display:block;border-radius:14px;
+    opacity:0;pointer-events:none;text-decoration:none;
+    transform:translate(-50%,-50%);
+  }
+  .hot.on{opacity:1;pointer-events:auto}
+  .hot-addr{left:50%;top:57%;width:62%;height:7.5%}
+  .hot-heart{left:48%;top:71%;width:36%;aspect-ratio:1;border-radius:50%}
+  .hot::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    border:2px solid rgba(229,138,165,.0);
+  }
+  .hot-heart.on::after{animation:ring 1.8s ease-out infinite}
+  .hot-addr.on::after{border-color:rgba(63,74,46,.0);animation:ringg 1.8s ease-out infinite}
+  @keyframes ring{0%{transform:scale(.8);border-color:rgba(229,138,165,.9)}100%{transform:scale(1.25);border-color:rgba(229,138,165,0)}}
+  @keyframes ringg{0%{transform:scale(.96);border-color:rgba(63,74,46,.7)}100%{transform:scale(1.08);border-color:rgba(63,74,46,0)}}
+
+  /* Barra fija de botones */
+  .bar{
+    position:absolute;left:0;right:0;bottom:0;z-index:20;
+    display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+    padding:12px 14px calc(14px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top,rgba(246,243,236,.85),rgba(246,243,236,0));
+    opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s;pointer-events:none;
+  }
+  .bar.show{opacity:1;transform:none;pointer-events:auto}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:12px 18px;border-radius:999px;text-decoration:none;
+    background:rgba(255,255,255,.94);color:var(--olive);
+    font-size:20px;font-weight:600;line-height:1;
+    border:1.5px solid rgba(63,74,46,.35);
+    box-shadow:0 4px 14px rgba(0,0,0,.18);
+  }
+  .pill svg{width:20px;height:20px;flex:none}
+  .pill.heart svg{fill:var(--pink)}
+  .pill.pin svg{fill:var(--olive)}
+  .pill:active{transform:scale(.97)}
+
+  /* Control de reproducción */
+  .ctrl{
+    position:absolute;top:calc(10px + env(safe-area-inset-top));right:10px;z-index:20;
+    display:flex;gap:8px;opacity:0;transition:opacity .4s;pointer-events:none;
+  }
+  .ctrl.show{opacity:1;pointer-events:auto}
+  .ctrl button{
+    width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
+    background:rgba(255,255,255,.8);display:grid;place-items:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.2)
+  }
+  .ctrl svg{width:20px;height:20px;fill:var(--olive)}
+  .progress{position:absolute;left:0;top:0;height:3px;width:0;background:var(--olive);z-index:20;opacity:.7}
+
+  /* Al terminar */
+  .replay{
+    position:absolute;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;
+    display:none;align-items:center;gap:8px;border:0;cursor:pointer;
+    padding:10px 18px;border-radius:999px;background:rgba(63,74,46,.88);color:#fff;font:600 18px "Cormorant Garamond",Georgia,serif;
+  }
+  .replay.show{display:inline-flex}
+  .replay svg{width:16px;height:16px;fill:#fff}
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+  <video id="v" src="invitacion.mp4" poster="portada.jpg" playsinline preload="auto"></video>
+
+  <a class="hot hot-addr" id="hAddr" href="https://maps.app.goo.gl/pG3vto83oBFLKwBK9" target="_blank" rel="noopener noreferrer" aria-label="Ver ubicación en Google Maps"></a>
+  <a class="hot hot-heart" id="hHeart" href="https://forms.gle/ky9TKk3YWYjKigVC8" target="_blank" rel="noopener noreferrer" aria-label="Confirmar asistencia (formulario)"></a>
+
+  <div class="progress" id="prog"></div>
+  <div class="ctrl" id="ctrl">
+    <button id="btnPlay" aria-label="Pausar / reproducir">
+      <svg viewBox="0 0 24 24" id="icoPause"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      <svg viewBox="0 0 24 24" id="icoPlay" style="display:none"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button id="btnMute" aria-label="Sonido">
+      <svg viewBox="0 0 24 24" id="icoSound"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+      <svg viewBox="0 0 24 24" id="icoMuted" style="display:none"><path d="M16.5 12a4.5 4.5 0 0 0-2.5-4v2.2l2.5 2.5V12zM19 12c0 .9-.2 1.8-.5 2.6l1.5 1.5A9 9 0 0 0 21 12a9 9 0 0 0-7-8.8v2.1A7 7 0 0 1 19 12zM4.3 3 3 4.3 7.7 9H3v6h4l5 4v-6.7l4.2 4.2c-.7.5-1.4.9-2.2 1.1v2.1a9 9 0 0 0 3.5-1.7l2.2 2.2 1.3-1.3L4.3 3zM12 5 9.9 6.9 12 9V5z"/></svg>
+    </button>
+  </div>
+
+  <button class="replay" id="replay"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>Ver de nuevo</button>
+
+  <nav class="bar" id="bar">
+    <a class="pill pin" href="https://maps.app.goo.gl/pG3vto83oBFLKwBK9" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+      Ver ubicación
+    </a>
+    <a class="pill heart" href="https://forms.gle/ky9TKk3YWYjKigVC8" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Confirmar asistencia
+    </a>
+  </nav>
+
+  <button class="cover" id="cover" aria-label="Abrir invitación" style="background-image:url(portada.jpg)">
+    <span class="veil"></span>
+    <span class="cta">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      Toca para abrir la invitación
+    </span>
+  </button>
+</main>
+
+<script>
+(function(){
+  var v = document.getElementById('v');
+  var cover = document.getElementById('cover');
+  var bar = document.getElementById('bar');
+  var ctrl = document.getElementById('ctrl');
+  var hAddr = document.getElementById('hAddr');
+  var hHeart = document.getElementById('hHeart');
+  var prog = document.getElementById('prog');
+  var replay = document.getElementById('replay');
+  var icoPause = document.getElementById('icoPause');
+  var icoPlay = document.getElementById('icoPlay');
+  var icoSound = document.getElementById('icoSound');
+  var icoMuted = document.getElementById('icoMuted');
+
+  // Ventanas de tiempo (segundos) en que cada elemento aparece en el video
+  var ADDR  = [25.5, 30.6];
+  var HEART = [30.4, 37.6];
+
+  function inWin(t, w){ return t >= w[0] && t <= w[1]; }
+
+  function sync(){
+    var t = v.currentTime || 0;
+    hAddr.classList.toggle('on', inWin(t, ADDR));
+    hHeart.classList.toggle('on', inWin(t, HEART));
+    if (v.duration) prog.style.width = (t / v.duration * 100) + '%';
+  }
+
+  function setPlayIcon(){
+    var paused = v.paused;
+    icoPause.style.display = paused ? 'none' : '';
+    icoPlay.style.display = paused ? '' : 'none';
+  }
+
+  function start(){
+    cover.classList.add('hide');
+    bar.classList.add('show');
+    ctrl.classList.add('show');
+    var p;
+    try { p = v.play(); } catch(e) {}
+    if (p && p.catch) {
+      p.catch(function(){
+        // Si el navegador bloquea el audio, reproducir sin sonido
+        v.muted = true; setMuteIcon();
+        try { v.play(); } catch(e) {}
+      });
+    }
+  }
+
+  function setMuteIcon(){
+    icoSound.style.display = v.muted ? 'none' : '';
+    icoMuted.style.display = v.muted ? '' : 'none';
+  }
+
+  cover.addEventListener('click', start);
+
+  document.getElementById('btnPlay').addEventListener('click', function(){
+    if (v.paused) { replay.classList.remove('show'); v.play().catch(function(){}); } else { v.pause(); }
+  });
+  document.getElementById('btnMute').addEventListener('click', function(){
+    v.muted = !v.muted; setMuteIcon();
+  });
+  replay.addEventListener('click', function(){
+    replay.classList.remove('show');
+    v.currentTime = 0;
+    v.play().catch(function(){});
+  });
+
+  v.addEventListener('timeupdate', sync);
+  v.addEventListener('seeked', sync);
+  v.addEventListener('play', function(){ setPlayIcon(); replay.classList.remove('show'); });
+  v.addEventListener('pause', setPlayIcon);
+  v.addEventListener('ended', function(){
+    hAddr.classList.remove('on'); hHeart.classList.remove('on');
+    replay.classList.add('show');
+    setPlayIcon();
+  });
+
+  setMuteIcon(); setPlayIcon(); sync();
+})();
+</script>
+</body>
+</html>
